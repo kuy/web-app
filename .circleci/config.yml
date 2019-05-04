@@ -6,6 +6,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install curl command
+          command: apk --no-cache add curl
+      - run:
           name: Install hub command
           command: |
             curl -sSLf https://github.com/github/hub/releases/download/v2.11.2/hub-linux-amd64-2.11.2.tgz | \
