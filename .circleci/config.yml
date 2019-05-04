@@ -5,8 +5,24 @@ jobs:
       - image: docker:18.06.0-ce-git
     steps:
       - checkout
+      - run:
+          name: Install hub command
+          command: |
+            curl -sSLf https://github.com/github/hub/releases/download/v2.11.2/hub-linux-amd64-2.11.2.tgz | \
+            tar zxf - --strip-components=1 -C /tmp/ && \
+            mv /tmp/bin/hub /usr/local/bin/hub
       - setup_remote_docker:
           version: 18.06.0-ce
-      - run: docker login -u $DOCKER_USER -p $DOCKER_PASS
-      - run: docker build -t netkuy/web-app:$CIRCLE_BUILD_NUM .
-      - run: docker push netkuy/web-app:$CIRCLE_BUILD_NUM
+      - run:
+          name: Login into Docker Hub
+          command: docker login -u $DOCKER_USER -p $DOCKER_PASS
+      - run:
+          name: Build an image
+          command: docker build -t netkuy/web-app:$CIRCLE_BUILD_NUM .
+      - run:
+          name: Push an image to Docker Registry
+          command: docker push netkuy/web-app:$CIRCLE_BUILD_NUM
+      - run:
+          name: Create a pull request
+          command: |
+            hub pull-request --message="My First Pull Request" --base=${CIRCLE_PROJECT_USERNAME}:master --head=${CIRCLE_PROJECT_USERNAME}:${CIRCLE_BRANCH}
