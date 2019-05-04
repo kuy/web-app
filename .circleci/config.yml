@@ -25,6 +25,7 @@ jobs:
       - run:
           name: Push an image to Docker Registry
           command: docker push netkuy/web-app:$CIRCLE_BUILD_NUM
+      - run: ls /usr/local/bin
       - run:
           name: Create a pull request
           command: |
