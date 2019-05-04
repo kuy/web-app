@@ -28,4 +28,4 @@ jobs:
       - run:
           name: Create a pull request
           command: |
-            hub pull-request --message="My First Pull Request" --base=${CIRCLE_PROJECT_USERNAME}:master --head=${CIRCLE_PROJECT_USERNAME}:${CIRCLE_BRANCH}
+            /usr/local/bin/hub pull-request --message="My First Pull Request" --base=${CIRCLE_PROJECT_USERNAME}:master --head=${CIRCLE_PROJECT_USERNAME}:${CIRCLE_BRANCH}
