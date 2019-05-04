@@ -27,7 +27,8 @@ jobs:
           command: docker push netkuy/web-app:$CIRCLE_BUILD_NUM
       - run: ls /usr/local/bin
       - run: echo $PATH
+      - run: hub version
       - run:
           name: Create a pull request
           command: |
-            /usr/local/bin/hub pull-request --message="My First Pull Request" --base=${CIRCLE_PROJECT_USERNAME}:master --head=${CIRCLE_PROJECT_USERNAME}:${CIRCLE_BRANCH}
+            hub pull-request --message="My First Pull Request" --base=${CIRCLE_PROJECT_USERNAME}:master --head=${CIRCLE_PROJECT_USERNAME}:${CIRCLE_BRANCH}
