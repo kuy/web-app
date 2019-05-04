@@ -5,9 +5,14 @@ jobs:
       - image: docker:18.06.0-ce-git
     steps:
       - checkout
-      - run:
+      - run: apk --no-cache add bash
+      - run: 
           name: Install hub command
-          command: apk --no-cache add hub
+          command: |
+            mkdir hub && \
+            wget https://github.com/github/hub/releases/download/v2.11.2/hub-linux-amd64-2.11.2.tgz -O- | \
+            tar xz --strip-components 1 --directory hub && \
+            ./hub/install && rm -r hub
       - setup_remote_docker:
           version: 18.06.0-ce
       - run:
