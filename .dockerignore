@@ -1,0 +1,7 @@
+.git
+.gitignore
+.ruby-version
+LICENSE
+Dockerfile
+.dockerignore
+README.md
