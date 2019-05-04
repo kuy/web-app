@@ -1,10 +1,12 @@
 version: 2
 jobs:
   build:
-    machine: true
+    docker:
+      - image: docker:18.06.0-ce-git
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 18.06.0-ce
       - run: docker login -u $DOCKER_USER -p $DOCKER_PASS
       - run: docker build -t netkuy/web-app:$CIRCLE_BUILD_NUM .
       - run: docker push netkuy/web-app:$CIRCLE_BUILD_NUM
