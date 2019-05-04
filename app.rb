@@ -12,7 +12,7 @@ class App < Sinatra::Base
   end
 
   get '/hello' do
-    'world'
+    'WORLD'
   end
 
   get '/sleep' do

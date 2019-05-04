@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/kuy/web-app/tree/master.svg?style=svg)](https://circleci.com/gh/kuy/web-app/tree/master)
+
 # web-app
 
 An example Dockerized web application using Sinatra/Ruby.
