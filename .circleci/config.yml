@@ -32,7 +32,7 @@ jobs:
           command: git clone git@github.com:kuy/web-app-k8s.git k8s
       - run:
           name: Create branch
-          command: git -C k8s checkout -b "build/$CIRCLE_BUILD_NUM"
+          command: git -C k8s checkout -b "build/$CIRCLE_BRANCH-$CIRCLE_BUILD_NUM"
       - run:
           name: Apply changes
           command: TAG=$CIRCLE_BUILD_NUM envsubst < k8s/templates/tag.yaml > k8s/production/tag.yaml
@@ -41,10 +41,10 @@ jobs:
           command: |
             git -C k8s add . && git -C k8s add -u . && \
             git -C k8s commit -m "Bump to $CIRCLE_BUILD_NUM" && \
-            git -C k8s push origin "build/$CIRCLE_BUILD_NUM"
+            git -C k8s push origin "build/$CIRCLE_BRANCH-$CIRCLE_BUILD_NUM"
       - run:
           name: Create a pull request
           command: |
             cd k8s && \
-            hub pull-request -m "Bump to $CIRCLE_BUILD_NUM" && \
+            hub pull-request -m "DEPLOY: $CIRCLE_BRANCH" && \
             cd ..
