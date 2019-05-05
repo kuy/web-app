@@ -5,10 +5,20 @@ jobs:
       - image: circleci/node:stretch
     steps:
       - checkout
-      - run: sudo apt-get update && sudo apt-get install -y gettext
-      - run: |
-          git config --global user.email "bot@example.com" && \
-          git config --global user.name "Build Bot"
+      - run:
+          name: Set environment variables
+          command: |
+            echo 'export COMMIT_MESSAGE=$(git --no-pager log --pretty="format:%s" -n 1 $CIRCLE_SHA1)' >> $BASH_ENV
+            echo 'export COMMIT_HASH=$(git --no-pager log --pretty="format:%h" -n 1 $CIRCLE_SHA1)' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Install envsubst
+          command: sudo apt-get update && sudo apt-get install -y gettext
+      - run:
+          name: Configure git
+          command: |
+            git config --global user.email "bot@example.com" && \
+            git config --global user.name "Build Bot"
       - run:
           name: Install hub command
           command: |
@@ -19,20 +29,19 @@ jobs:
       - setup_remote_docker:
           version: 18.06.0-ce
       - run:
-          name: Login into Docker Hub
-          command: docker login -u $DOCKER_USER -p $DOCKER_PASS
-      - run:
           name: Build an image
-          command: docker build -t netkuy/web-app:$CIRCLE_BUILD_NUM .
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker build -t netkuy/web-app:$COMMIT_HASH-$CIRCLE_BUILD_NUM .
       - run:
           name: Push an image to Docker Registry
-          command: docker push netkuy/web-app:$CIRCLE_BUILD_NUM
+          command: docker push netkuy/web-app:$COMMIT_HASH-$CIRCLE_BUILD_NUM
       - run:
           name: Clone k8s repo
           command: git clone git@github.com:kuy/web-app-k8s.git k8s
       - run:
           name: Create branch
-          command: git -C k8s checkout -b "build/$CIRCLE_BRANCH-$CIRCLE_BUILD_NUM"
+          command: git -C k8s checkout -b "build/$CIRCLE_BUILD_NUM"
       - run:
           name: Apply changes
           command: TAG=$CIRCLE_BUILD_NUM envsubst < k8s/templates/tag.yaml > k8s/production/tag.yaml
@@ -41,10 +50,19 @@ jobs:
           command: |
             git -C k8s add . && git -C k8s add -u . && \
             git -C k8s commit -m "Bump to $CIRCLE_BUILD_NUM" && \
-            git -C k8s push origin "build/$CIRCLE_BRANCH-$CIRCLE_BUILD_NUM"
+            git -C k8s push origin "build/$CIRCLE_BUILD_NUM"
       - run:
           name: Create a pull request
           command: |
             cd k8s && \
-            hub pull-request -m "DEPLOY: $CIRCLE_BRANCH" && \
+            hub pull-request -m "Deploy: $COMMIT_MESSAGE [$COMMIT_HASH]" && \
             cd ..
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: master
