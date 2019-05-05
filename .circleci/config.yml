@@ -2,17 +2,17 @@ version: 2
 jobs:
   build:
     docker:
-      - image: docker:18.06.0-ce-git
+      - image: circleci/node:stretch
     steps:
       - checkout
-      - run: apk --no-cache add bash
-      - run: 
+      - run: sudo apt-get update && sudo apt-get install -y gettext
+      - run:
           name: Install hub command
           command: |
             mkdir hub && \
             wget https://github.com/github/hub/releases/download/v2.11.2/hub-linux-amd64-2.11.2.tgz -O- | \
             tar xz --strip-components 1 --directory hub && \
-            ./hub/install && rm -r hub
+            sudo ./hub/install && rm -r hub
       - setup_remote_docker:
           version: 18.06.0-ce
       - run:
@@ -24,6 +24,21 @@ jobs:
       - run:
           name: Push an image to Docker Registry
           command: docker push netkuy/web-app:$CIRCLE_BUILD_NUM
+      - run:
+          name: Clone k8s repo
+          command: git clone git@github.com:kuy/web-app-k8s.git k8s
+      - run:
+          name: Create branch
+          command: git -C k8s checkout -b "build/$CIRCLE_BUILD_NUM"
+      - run:
+          name: Apply changes
+          command: TAG=$CIRCLE_BUILD_NUM envsubst < k8s/templates/tag.yaml > k8s/production/tag.yaml
+      - run:
+          name: Commit changes
+          command: |
+            git -C k8s add . && git -C k8s add -u . && \
+            git -C k8s commit -m "Bump to $CIRCLE_BUILD_NUM" && \
+            git -C k8s push origin "build/$CIRCLE_BUILD_NUM"
       - run:
           name: Create a pull request
           command: |
