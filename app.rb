@@ -8,7 +8,7 @@ class App < Sinatra::Base
   end
 
   get '/' do
-    'OK, OK, OK'
+    'OK'
   end
 
   get '/hello' do
