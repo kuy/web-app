@@ -44,7 +44,7 @@ jobs:
           command: git -C k8s checkout -b "build/$CIRCLE_BUILD_NUM"
       - run:
           name: Apply changes
-          command: TAG=$CIRCLE_BUILD_NUM envsubst < k8s/templates/tag.yaml > k8s/production/tag.yaml
+          command: TAG="$COMMIT_HASH-$CIRCLE_BUILD_NUM" envsubst < k8s/templates/tag.yaml > k8s/production/tag.yaml
       - run:
           name: Commit changes
           command: |
